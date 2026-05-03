@@ -1,0 +1,40 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# .gitignore for MedLink Terraform repository
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── NEVER commit these — they contain secrets and subscription IDs ────────────
+*.tfvars
+*.tfvars.json
+
+# Exception: commit the example template so teammates know what to fill in
+!terraform.tfvars.example
+
+# ── Terraform state — managed remotely in Azure Blob, not in git ─────────────
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# ── Terraform plan output files ───────────────────────────────────────────────
+*.tfplan
+plan.tfplan
+
+# ── Terraform working directories ────────────────────────────────────────────
+.terraform/
+.terraform.lock.hcl
+
+# ── Crash logs ────────────────────────────────────────────────────────────────
+crash.log
+crash.*.log
+
+# ── Override files (local developer overrides — not for team sharing) ─────────
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
