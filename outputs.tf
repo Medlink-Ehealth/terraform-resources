@@ -1,55 +1,45 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# environments/dev/outputs.tf
-# Printed to terminal after terraform apply.
-# Also used by future modules (AKS, Postgres) to reference network resources.
+# outputs.tf
+# Values printed to terminal after terraform apply.
+# Also consumed by other pipelines or modules that need these IDs.
 # ─────────────────────────────────────────────────────────────────────────────
 
 output "resource_group_name" {
-  description = "Name of the dev resource group."
-  value       = azurerm_resource_group.dev.name
+  description = "Name of the resource group."
+  value       = azurerm_resource_group.main.name
 }
 
 output "vnet_id" {
-  description = "Resource ID of the dev VNet."
+  description = "VNet resource ID."
   value       = module.network.vnet_id
 }
 
 output "vnet_name" {
-  description = "Name of the dev VNet."
+  description = "VNet name."
   value       = module.network.vnet_name
 }
 
 output "subnet_aks_id" {
-  description = "AKS subnet ID — pass to the AKS module (MED-18)."
+  description = "AKS subnet ID — consumed by AKS module."
   value       = module.network.subnet_aks_id
 }
 
 output "subnet_postgres_id" {
-  description = "Postgres subnet ID — pass to the postgres module."
+  description = "PostgreSQL private endpoint subnet ID."
   value       = module.network.subnet_postgres_id
 }
 
-output "subnet_gateway_id" {
-  description = "Gateway subnet ID — used when Front Door is added."
-  value       = module.network.subnet_gateway_id
-}
-
 output "aks_cluster_name" {
-  description = "AKS cluster name — use this to get credentials."
+  description = "AKS cluster name — use with az aks get-credentials."
   value       = module.aks.cluster_name
 }
 
 output "oidc_issuer_url" {
-  description = "OIDC issuer URL for Workload Identity setup."
+  description = "AKS OIDC issuer URL — needed for Workload Identity."
   value       = module.aks.oidc_issuer_url
 }
 
 output "key_vault_uri" {
-  description = "Key Vault URI — where the kubeconfig secret is stored."
+  description = "Key Vault URI — where kubeconfig secret is stored."
   value       = module.aks.key_vault_uri
-}
-
-output "kubeconfig_secret_name" {
-  description = "Key Vault secret name holding the kubeconfig."
-  value       = module.aks.kubeconfig_secret_name
 }

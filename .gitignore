@@ -2,14 +2,18 @@
 # .gitignore for MedLink Terraform repository
 # ─────────────────────────────────────────────────────────────────────────────
 
-# ── NEVER commit these — they contain secrets and subscription IDs ────────────
+# ── NEVER commit these — they contain secrets ─────────────────────────────────
+# Any root-level tfvars file a developer might create locally with credentials
 *.tfvars
 *.tfvars.json
 
-# Exception: commit the example template so teammates know what to fill in
-!terraform.tfvars.example
+# Exception: our environment tfvars files are safe — they contain NO credentials.
+# Credentials come from environment variables or GitHub Secrets only.
+!environments/dev.tfvars
+!environments/prod.tfvars
+!environments/staging.tfvars
 
-# ── Terraform state — managed remotely in Azure Blob, not in git ─────────────
+# ── Terraform state — managed remotely via pipeline, never in git ─────────────
 *.tfstate
 *.tfstate.*
 *.tfstate.backup
@@ -26,7 +30,7 @@ plan.tfplan
 crash.log
 crash.*.log
 
-# ── Override files (local developer overrides — not for team sharing) ─────────
+# ── Override files ────────────────────────────────────────────────────────────
 override.tf
 override.tf.json
 *_override.tf
