@@ -120,3 +120,10 @@ variable "waf_mode" {
   type        = string
   default     = "Detection"
 }
+
+# ── Storage ───────────────────────────────────────────────────────────────────
+
+variable "storage_account_name" {
+  description = "Name of the storage account. Must be globally unique, 3-24 chars, lowercase and numbers only."
+  type        = string
+}

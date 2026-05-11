@@ -98,3 +98,29 @@ module "frontdoor" {
 
   depends_on = [module.aks]
 }
+
+# ── Storage Module (MED-118) ──────────────────────────────────────────────────
+# Creates storage account with three containers: documents, pdfs, tfstate.
+# Configures soft-delete (7 days), versioning on tfstate,
+# and lifecycle policy (Cool after 90 days, Archive after 365 days).
+
+module "storage" {
+  source = "./modules/storage"
+
+  resource_group_name        = azurerm_resource_group.main.name
+  location                   = var.location
+  storage_account_name       = var.storage_account_name
+  account_tier               = "Standard"
+  account_replication_type   = "LRS"
+  soft_delete_retention_days = 7
+  cool_tier_after_days       = 90
+  archive_tier_after_days    = 365
+  environment                = var.environment
+  project                    = var.project
+  owner                      = var.owner
+  cost_center                = var.cost_center
+
+  depends_on = [azurerm_resource_group.main]
+}
+
+

@@ -27,3 +27,6 @@ key_vault_name      = "medlink-kv"
 # Front Door
 nginx_ingress_ip = "PROD_NGINX_IP_HERE"
 waf_mode         = "Prevention"
+
+# Storage
+storage_account_name = "medlinkstorageprod"

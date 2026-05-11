@@ -49,3 +49,13 @@ output "frontdoor_hostname" {
   description = "Front Door public hostname — open this in a browser to test."
   value       = module.frontdoor.frontdoor_endpoint_hostname
 }
+
+output "storage_account_name" {
+  description = "Storage account name."
+  value       = module.storage.storage_account_name
+}
+
+output "primary_blob_endpoint" {
+  description = "Primary blob endpoint URL."
+  value       = module.storage.primary_blob_endpoint
+}

@@ -31,3 +31,6 @@ key_vault_name      = "medlink-kv"
 # Front Door
 nginx_ingress_ip = "20.167.106.121"
 waf_mode         = "Detection"
+
+# Storage
+storage_account_name = "medlinkstoragedev"

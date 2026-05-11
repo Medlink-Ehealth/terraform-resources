@@ -3,10 +3,10 @@
 ![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.7.0-7B42BC?logo=terraform)
 ![AzureRM](https://img.shields.io/badge/AzureRM-~3.110.0-0078D4?logo=microsoftazure)
 ![Status](https://img.shields.io/badge/Status-Active-28a745)
-![Sprint](https://img.shields.io/badge/Sprint-1%20%26%202-orange)
+![Sprint](https://img.shields.io/badge/Sprint-1%20%7C%202%20%7C%203-orange)
 ![Engineer](https://img.shields.io/badge/Cloud%20Engineer-Pelumi-blue)
 
-> Infrastructure as Code for the **MedLink Health Platform** — provisioning Azure networking, AKS, and Front Door using Terraform modules.
+> Infrastructure as Code for the **MedLink Health Platform** — provisioning Azure networking, AKS, Front Door, and Blob Storage using Terraform modules.
 
 ---
 
@@ -30,11 +30,12 @@
 
 This repository manages all Azure infrastructure for MedLink using a modular Terraform approach. A single set of root configuration files calls reusable modules, and environment-specific values are passed via `.tfvars` files at runtime — keeping the codebase DRY across dev, staging, and production.
 
-| Ticket  | Module              | Description                               |
-| ------- | ------------------- | ----------------------------------------- |
-| MED-17  | `modules/network`   | VNet, Subnets, NSGs                       |
-| MED-107 | `modules/aks`       | AKS Cluster, Key Vault, Workload Identity |
-| MED-105 | `modules/frontdoor` | Azure Front Door Standard, WAF Policy     |
+| Ticket  | Module              | Description                                   |
+| ------- | ------------------- | --------------------------------------------- |
+| MED-17  | `modules/network`   | VNet, Subnets, NSGs                           |
+| MED-107 | `modules/aks`       | AKS Cluster, Key Vault, Workload Identity     |
+| MED-105 | `modules/frontdoor` | Azure Front Door Standard, WAF Policy         |
+| MED-118 | `modules/storage`   | Blob Storage, Lifecycle Policies, Soft Delete |
 
 ---
 
@@ -53,8 +54,13 @@ NGINX Ingress Controller (AKS)
     │
     ├──▶ Application Pods (Spot Node Pool — Standard_D2s_v4)
     │
-    └──▶ PostgreSQL Private Endpoint (postgres-pe subnet)
-              No public IP — VNet only
+    ├──▶ PostgreSQL Private Endpoint (postgres-pe subnet)
+    │         No public IP — VNet only
+    │
+    └──▶ Azure Blob Storage
+              medlink-documents  (Cool after 90d, Archive after 365d)
+              medlink-pdfs       (Cool after 90d, Archive after 365d)
+              medlink-tfstate    (versioning enabled)
 ```
 
 ---
@@ -78,7 +84,12 @@ terraform-resources/
 │   │   ├── outputs.tf
 │   │   └── variables.tf
 │   │
-│   └── frontdoor/          # MED-105: Front Door Standard + WAF
+│   ├── frontdoor/          # MED-105: Front Door Standard + WAF
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   │
+│   └── storage/            # MED-118: Blob Storage, Lifecycle, Soft Delete
 │       ├── main.tf
 │       ├── outputs.tf
 │       └── variables.tf
@@ -256,9 +267,18 @@ terraform destroy -var-file=environments/dev.tfvars
 | WAF Policy         | `medlinkwafpolicy`            | Detection mode (dev), Prevention (prod) |
 | Security Policy    | `medlink-security-policy-dev` | WAF enforced on all traffic             |
 
----
+### Storage Module — MED-118
 
-## Network Architecture
+| Resource                     | Name                  | Details                                    |
+| ---------------------------- | --------------------- | ------------------------------------------ |
+| Storage Account              | `medlinkstoragedev`   | BlobStorage, Standard LRS, Australia East  |
+| Container — Documents        | `medlink-documents`   | Private access, soft-delete 7 days         |
+| Container — PDFs             | `medlink-pdfs`        | Private access, soft-delete 7 days         |
+| Container — TF State         | `medlink-tfstate`     | Private access, versioning enabled         |
+| Lifecycle Policy — Documents | `documents-lifecycle` | Cool after 90 days, Archive after 365 days |
+| Lifecycle Policy — PDFs      | `pdfs-lifecycle`      | Cool after 90 days, Archive after 365 days |
+
+---
 
 The networking layer is built in three isolated tiers inside a single Virtual Network (VNet). Every resource in the MedLink platform lives inside this VNet — nothing is exposed to the public internet unless explicitly opened.
 
@@ -366,7 +386,7 @@ The `prod.tfvars` file uses larger VM sizes, higher node counts, and WAF in `Pre
 | MED-17   | `modules/network`    | Pelumi  | ✅ Complete |
 | MED-107  | `modules/aks`        | Pelumi  | ✅ Complete |
 | MED-105  | `modules/frontdoor`  | Pelumi  | ✅ Complete |
-| MED-118  | `modules/storage`    | Pelumi  | 🔜 Next     |
+| MED-118  | `modules/storage`    | Pelumi  | ✅ Complete |
 | MED-19   | `modules/postgres`   | Michael | 🔜 Upcoming |
 | MED-19   | `modules/redis`      | Michael | 🔜 Upcoming |
 | MED-19   | `modules/keyvault`   | Michael | 🔜 Upcoming |
