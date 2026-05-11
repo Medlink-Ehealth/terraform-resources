@@ -10,12 +10,19 @@
 
 locals {
   common_tags = {
-    environment = var.environment
-    project     = var.project
-    owner       = var.owner
-    cost_center = var.cost_center
-    managed_by  = "terraform"
-    module      = "network"
+    # Functional tags
+    env        = var.environment
+    app        = var.project
+    region     = var.region
+    managed_by = "terraform"
+    module     = "network"
+    # Accounting tags
+    costcenter = var.cost_center
+    # Ownership tags
+    opsteam      = var.owner
+    businessunit = var.business_unit
+    # Classification tags
+    criticality = var.criticality
   }
 }
 
@@ -26,7 +33,7 @@ locals {
 # ─────────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_virtual_network" "main" {
-  name                = "${var.vnet_name}-${var.environment}"
+  name                = var.vnet_name
   location            = var.location
   resource_group_name = var.resource_group_name
   address_space       = var.vnet_address_space
@@ -87,7 +94,7 @@ resource "azurerm_subnet" "gateway" {
 # Blocks ALL public internet inbound — AKS API server is handled separately.
 
 resource "azurerm_network_security_group" "aks_nodes" {
-  name                = "nsg-aks-nodes-${var.environment}"
+  name                = "nsg-aks-001"
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -166,7 +173,7 @@ resource "azurerm_network_security_group" "aks_nodes" {
 # Everything else — including the public internet — is denied.
 
 resource "azurerm_network_security_group" "postgres_pe" {
-  name                = "nsg-postgres-pe-${var.environment}"
+  name                = "nsg-psql-001"
   location            = var.location
   resource_group_name = var.resource_group_name
 
@@ -205,7 +212,7 @@ resource "azurerm_network_security_group" "postgres_pe" {
 # Allows HTTPS from the internet and HTTP health probes from Front Door.
 
 resource "azurerm_network_security_group" "gateway" {
-  name                = "nsg-gateway-${var.environment}"
+  name                = "nsg-gw-001"
   location            = var.location
   resource_group_name = var.resource_group_name
 

@@ -23,12 +23,19 @@ data "azurerm_client_config" "current" {}
 
 locals {
   common_tags = {
-    environment = var.environment
-    project     = var.project
-    owner       = var.owner
-    cost_center = var.cost_center
-    managed_by  = "terraform"
-    module      = "aks"
+    # Functional tags
+    env        = var.environment
+    app        = var.project
+    region     = var.region
+    managed_by = "terraform"
+    module     = "aks"
+    # Accounting tags
+    costcenter = var.cost_center
+    # Ownership tags
+    opsteam      = var.owner
+    businessunit = var.business_unit
+    # Classification tags
+    criticality = var.criticality
   }
 }
 
@@ -43,7 +50,7 @@ locals {
 # ─────────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_key_vault" "main" {
-  name                = "${var.key_vault_name}-${var.environment}"
+  name                = var.key_vault_name
   location            = var.location
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
@@ -110,8 +117,8 @@ resource "azurerm_kubernetes_cluster" "main" {
     only_critical_addons_enabled = true
 
     node_labels = {
-      "nodepool-type" = "system"
-      "environment"   = var.environment
+      "nodepool-type" = "npsystem"
+      "env"           = var.environment
       "nodepoolos"    = "linux"
     }
   }
@@ -174,8 +181,8 @@ resource "azurerm_kubernetes_cluster_node_pool" "spot" {
   # scheduling here unless the pod explicitly tolerates it.
   # Our app pods will need to tolerate: kubernetes.azure.com/scalesetpriority=spot:NoSchedule
   node_labels = {
-    "nodepool-type"                         = "user"
-    "environment"                           = var.environment
+    "nodepool-type"                         = "np"
+    "env"                                   = var.environment
     "nodepoolos"                            = "linux"
     "kubernetes.azure.com/scalesetpriority" = "spot"
   }

@@ -12,14 +12,22 @@
 
 locals {
   common_tags = {
-    environment = var.environment
-    project     = var.project
-    owner       = var.owner
-    cost_center = var.cost_center
-    managed_by  = "terraform"
-    module      = "storage"
+    # Functional tags
+    env        = var.environment
+    app        = var.project
+    region     = var.region
+    managed_by = "terraform"
+    module     = "storage"
+    # Accounting tags
+    costcenter = var.cost_center
+    # Ownership tags
+    opsteam      = var.owner
+    businessunit = var.business_unit
+    # Classification tags
+    criticality = var.criticality
   }
 }
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # STORAGE ACCOUNT

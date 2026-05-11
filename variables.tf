@@ -127,3 +127,23 @@ variable "storage_account_name" {
   description = "Name of the storage account. Must be globally unique, 3-24 chars, lowercase and numbers only."
   type        = string
 }
+
+# ── CAF Tags ──────────────────────────────────────────────────────────────────
+
+variable "region" {
+  description = "Azure region label for tagging."
+  type        = string
+  default     = "australiaeast"
+}
+
+variable "business_unit" {
+  description = "Business unit responsible for the resources."
+  type        = string
+  default     = "engineering"
+}
+
+variable "criticality" {
+  description = "Resource criticality per CAF. Values: low, medium, high, mission-critical"
+  type        = string
+  default     = "low"
+}

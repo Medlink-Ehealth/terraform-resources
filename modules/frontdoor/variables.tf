@@ -18,9 +18,9 @@ variable "location" {
 # ── Front Door ────────────────────────────────────────────────────────────────
 
 variable "frontdoor_name" {
-  description = "Name of the Azure Front Door profile."
+  description = "Name of the Front Door profile. CAF format: afd-{workload}-{env}"
   type        = string
-  default     = "medlink-frontdoor"
+  default     = "afd-medlink-dev"
 }
 
 variable "origin_ip" {
@@ -45,9 +45,9 @@ variable "origin_https_port" {
 # ── WAF Policy ────────────────────────────────────────────────────────────────
 
 variable "waf_policy_name" {
-  description = "Name of the WAF policy attached to Front Door."
+  description = "Name of the WAF policy. CAF format: fdfp-{workload}-{env}. No hyphens allowed."
   type        = string
-  default     = "medlinkwafpolicy"
+  default     = "fdfpmedlinkdev"
 }
 
 variable "waf_mode" {
@@ -78,4 +78,22 @@ variable "cost_center" {
   description = "Cost center for billing tags."
   type        = string
   default     = "medlink-engineering"
+}
+
+variable "region" {
+  description = "Azure region label for tagging."
+  type        = string
+  default     = "australiaeast"
+}
+
+variable "business_unit" {
+  description = "Business unit responsible for this resource."
+  type        = string
+  default     = "engineering"
+}
+
+variable "criticality" {
+  description = "Resource criticality. CAF values: low, medium, high, mission-critical"
+  type        = string
+  default     = "low"
 }

@@ -20,6 +20,11 @@ subnet_aks_cidr      = "10.0.1.0/24"
 subnet_postgres_cidr = "10.0.2.0/24"
 subnet_gateway_cidr  = "10.0.3.0/24"
 
+# CAF Tags
+region        = "australiaeast"
+business_unit = "engineering"
+criticality   = "low"
+
 # AKS
 kubernetes_version  = "1.35.3"
 system_node_vm_size = "Standard_D2s_v4"
@@ -33,4 +38,4 @@ nginx_ingress_ip = "20.167.106.121"
 waf_mode         = "Detection"
 
 # Storage
-storage_account_name = "medlinkstoragedev"
+storage_account_name = "stmedlink001"

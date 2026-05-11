@@ -14,14 +14,22 @@
 
 locals {
   common_tags = {
-    environment = var.environment
-    project     = var.project
-    owner       = var.owner
-    cost_center = var.cost_center
-    managed_by  = "terraform"
-    module      = "frontdoor"
+    # Functional tags
+    env        = var.environment
+    app        = var.project
+    region     = var.region
+    managed_by = "terraform"
+    module     = "frontdoor"
+    # Accounting tags
+    costcenter = var.cost_center
+    # Ownership tags
+    opsteam      = var.owner
+    businessunit = var.business_unit
+    # Classification tags
+    criticality = var.criticality
   }
 }
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # WAF POLICY
@@ -69,7 +77,7 @@ resource "azurerm_cdn_frontdoor_firewall_policy" "waf" {
 # ─────────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_profile" "main" {
-  name                = "${var.frontdoor_name}-${var.environment}"
+  name                = var.frontdoor_name
   resource_group_name = var.resource_group_name
   sku_name            = "Standard_AzureFrontDoor"
 
@@ -84,7 +92,7 @@ resource "azurerm_cdn_frontdoor_profile" "main" {
 # ─────────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_endpoint" "main" {
-  name                     = "medlink-${var.environment}"
+  name                     = "fde-medlink-${var.environment}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   tags = local.common_tags
@@ -100,7 +108,7 @@ resource "azurerm_cdn_frontdoor_endpoint" "main" {
 # ─────────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_origin_group" "main" {
-  name                     = "medlink-origin-group-${var.environment}"
+  name                     = "afd-og-medlink-${var.environment}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   # Health probe — Front Door pings /healthz every 100 seconds.
@@ -130,7 +138,7 @@ resource "azurerm_cdn_frontdoor_origin_group" "main" {
 # ─────────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_origin" "nginx" {
-  name                          = "nginx-ingress-${var.environment}"
+  name                          = "afd-origin-nginx-${var.environment}"
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.main.id
 
   # The NGINX Ingress Controller external IP from:
@@ -158,7 +166,7 @@ resource "azurerm_cdn_frontdoor_origin" "nginx" {
 # ─────────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_route" "main" {
-  name                          = "medlink-route-${var.environment}"
+  name                          = "afd-route-medlink-${var.environment}"
   cdn_frontdoor_endpoint_id     = azurerm_cdn_frontdoor_endpoint.main.id
   cdn_frontdoor_origin_group_id = azurerm_cdn_frontdoor_origin_group.main.id
   cdn_frontdoor_origin_ids      = [azurerm_cdn_frontdoor_origin.nginx.id]
@@ -183,7 +191,7 @@ resource "azurerm_cdn_frontdoor_route" "main" {
 # ─────────────────────────────────────────────────────────────────────────────
 
 resource "azurerm_cdn_frontdoor_security_policy" "waf" {
-  name                     = "medlink-security-policy-${var.environment}"
+  name                     = "afd-secp-medlink-${var.environment}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.main.id
 
   security_policies {

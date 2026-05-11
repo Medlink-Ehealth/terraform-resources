@@ -29,4 +29,9 @@ nginx_ingress_ip = "PROD_NGINX_IP_HERE"
 waf_mode         = "Prevention"
 
 # Storage
-storage_account_name = "medlinkstorageprod"
+storage_account_name = "stmedlinkprod001"
+
+# CAF Tags
+region        = "australiaeast"
+business_unit = "engineering"
+criticality   = "mission-critical"

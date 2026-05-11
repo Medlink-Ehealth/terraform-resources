@@ -15,11 +15,14 @@ resource "azurerm_resource_group" "main" {
   location = var.location
 
   tags = {
-    environment = var.environment
-    project     = var.project
-    owner       = var.owner
-    cost_center = var.cost_center
-    managed_by  = "terraform"
+    env          = var.environment
+    app          = var.project
+    region       = var.region
+    managed_by   = "terraform"
+    costcenter   = var.cost_center
+    opsteam      = var.owner
+    businessunit = var.business_unit
+    criticality  = var.criticality
   }
 }
 
@@ -32,18 +35,21 @@ module "network" {
 
   resource_group_name  = azurerm_resource_group.main.name
   location             = var.location
-  vnet_name            = "medlink-vnet"
+  vnet_name            = "vnet-medlink-aue-001"
   vnet_address_space   = var.vnet_address_space
-  subnet_aks_name      = "aks-nodes"
+  subnet_aks_name      = "snet-aks-aue-001"
   subnet_aks_cidr      = var.subnet_aks_cidr
-  subnet_postgres_name = "postgres-pe"
+  subnet_postgres_name = "snet-psql-aue-001"
   subnet_postgres_cidr = var.subnet_postgres_cidr
-  subnet_gateway_name  = "gateway"
+  subnet_gateway_name  = "snet-gw-aue-001"
   subnet_gateway_cidr  = var.subnet_gateway_cidr
   environment          = var.environment
   project              = var.project
   owner                = var.owner
   cost_center          = var.cost_center
+  region               = var.region
+  business_unit        = var.business_unit
+  criticality          = var.criticality
 
   depends_on = [azurerm_resource_group.main]
 }
@@ -59,7 +65,7 @@ module "aks" {
   resource_group_name = azurerm_resource_group.main.name
   location            = var.location
   subnet_aks_id       = module.network.subnet_aks_id
-  cluster_name        = "medlink-${var.environment}-aks"
+  cluster_name        = "aks-medlink-${var.environment}"
   kubernetes_version  = var.kubernetes_version
   dns_prefix          = "medlink-${var.environment}"
   system_node_count   = 1
@@ -67,11 +73,14 @@ module "aks" {
   spot_node_vm_size   = var.spot_node_vm_size
   spot_node_min_count = var.spot_node_min_count
   spot_node_max_count = var.spot_node_max_count
-  key_vault_name      = var.key_vault_name
+  key_vault_name      = "kv-medlink-${var.environment}"
   environment         = var.environment
   project             = var.project
   owner               = var.owner
   cost_center         = var.cost_center
+  region              = var.region
+  business_unit       = var.business_unit
+  criticality         = var.criticality
 
   depends_on = [module.network]
 }
@@ -87,14 +96,17 @@ module "frontdoor" {
 
   resource_group_name = azurerm_resource_group.main.name
   location            = var.location
-  frontdoor_name      = "medlink-frontdoor"
+  frontdoor_name      = "afd-medlink-${var.environment}"
   origin_ip           = var.nginx_ingress_ip
-  waf_policy_name     = "medlinkwafpolicy"
+  waf_policy_name     = "fdfpmedlink${var.environment}"
   waf_mode            = var.waf_mode
   environment         = var.environment
   project             = var.project
   owner               = var.owner
   cost_center         = var.cost_center
+  region              = var.region
+  business_unit       = var.business_unit
+  criticality         = var.criticality
 
   depends_on = [module.aks]
 }
@@ -119,8 +131,9 @@ module "storage" {
   project                    = var.project
   owner                      = var.owner
   cost_center                = var.cost_center
+  region                     = var.region
+  business_unit              = var.business_unit
+  criticality                = var.criticality
 
   depends_on = [azurerm_resource_group.main]
 }
-
-

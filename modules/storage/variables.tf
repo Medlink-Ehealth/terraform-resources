@@ -18,9 +18,9 @@ variable "location" {
 # ── Storage Account ───────────────────────────────────────────────────────────
 
 variable "storage_account_name" {
-  description = "Name of the storage account. Must be globally unique, 3-24 chars, lowercase and numbers only."
+  description = "Name of the storage account. CAF format: st{workload}{###}. No hyphens — globally unique, 3-24 chars, lowercase and numbers only."
   type        = string
-  default     = "medlinkstoragedev"
+  default     = "stmedlink001"
 }
 
 variable "account_tier" {
@@ -79,4 +79,22 @@ variable "cost_center" {
   description = "Cost center for billing tags."
   type        = string
   default     = "medlink-engineering"
+}
+
+variable "region" {
+  description = "Azure region label for tagging."
+  type        = string
+  default     = "australiaeast"
+}
+
+variable "business_unit" {
+  description = "Business unit responsible for this resource."
+  type        = string
+  default     = "engineering"
+}
+
+variable "criticality" {
+  description = "Resource criticality. CAF values: low, medium, high, mission-critical"
+  type        = string
+  default     = "low"
 }

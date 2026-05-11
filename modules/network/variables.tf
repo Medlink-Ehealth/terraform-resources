@@ -19,9 +19,9 @@ variable "location" {
 # ── VNet ──────────────────────────────────────────────────────────────────────
 
 variable "vnet_name" {
-  description = "Name of the Virtual Network."
+  description = "Name of the Virtual Network. CAF format: vnet-{workload}-{region}-{instance}"
   type        = string
-  default     = "medlink-vnet"
+  default     = "vnet-medlink-aue-001"
 }
 
 variable "vnet_address_space" {
@@ -33,9 +33,9 @@ variable "vnet_address_space" {
 # ── Subnets ───────────────────────────────────────────────────────────────────
 
 variable "subnet_aks_name" {
-  description = "Name of the subnet for AKS worker nodes."
+  description = "Name of the AKS nodes subnet. CAF format: snet-{purpose}-{region}-{instance}"
   type        = string
-  default     = "aks-nodes"
+  default     = "snet-aks-aue-001"
 }
 
 variable "subnet_aks_cidr" {
@@ -45,9 +45,9 @@ variable "subnet_aks_cidr" {
 }
 
 variable "subnet_postgres_name" {
-  description = "Name of the subnet for PostgreSQL private endpoint."
+  description = "Name of the PostgreSQL private endpoint subnet. CAF format: snet-{purpose}-{region}-{instance}"
   type        = string
-  default     = "postgres-pe"
+  default     = "snet-psql-aue-001"
 }
 
 variable "subnet_postgres_cidr" {
@@ -57,9 +57,9 @@ variable "subnet_postgres_cidr" {
 }
 
 variable "subnet_gateway_name" {
-  description = "Name of the gateway subnet (reserved for future Front Door)."
+  description = "Name of the gateway subnet. CAF format: snet-{purpose}-{region}-{instance}"
   type        = string
-  default     = "gateway"
+  default     = "snet-gw-aue-001"
 }
 
 variable "subnet_gateway_cidr" {
@@ -90,4 +90,22 @@ variable "cost_center" {
   description = "Cost center code for billing tags."
   type        = string
   default     = "medlink-engineering"
+}
+
+variable "region" {
+  description = "Azure region label for tagging. e.g. 'australiaeast'"
+  type        = string
+  default     = "australiaeast"
+}
+
+variable "business_unit" {
+  description = "Business unit responsible for this resource."
+  type        = string
+  default     = "engineering"
+}
+
+variable "criticality" {
+  description = "Resource criticality. CAF values: low, medium, high, mission-critical"
+  type        = string
+  default     = "low"
 }

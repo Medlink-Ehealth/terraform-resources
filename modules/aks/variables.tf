@@ -28,11 +28,10 @@ variable "subnet_aks_id" {
 # ── AKS Cluster ───────────────────────────────────────────────────────────────
 
 variable "cluster_name" {
-  description = "Name of the AKS cluster."
+  description = "Name of the AKS cluster. CAF format: aks-{workload}-{env}"
   type        = string
-  default     = "medlink-dev-aks"
+  default     = "aks-medlink-dev"
 }
-
 variable "kubernetes_version" {
   description = "Kubernetes version to run on the cluster."
   type        = string
@@ -87,9 +86,9 @@ variable "spot_node_max_count" {
 # ── Key Vault ─────────────────────────────────────────────────────────────────
 
 variable "key_vault_name" {
-  description = "Name of the Azure Key Vault to store the kubeconfig secret."
+  description = "Name of the Azure Key Vault. CAF format: kv-{workload}-{env}"
   type        = string
-  default     = "medlink-dev-kv"
+  default     = "kv-medlink-dev"
 }
 
 # ── Tagging ───────────────────────────────────────────────────────────────────
@@ -114,4 +113,22 @@ variable "cost_center" {
   description = "Cost center for billing tags."
   type        = string
   default     = "medlink-engineering"
+}
+
+variable "region" {
+  description = "Azure region label for tagging."
+  type        = string
+  default     = "australiaeast"
+}
+
+variable "business_unit" {
+  description = "Business unit responsible for this resource."
+  type        = string
+  default     = "engineering"
+}
+
+variable "criticality" {
+  description = "Resource criticality. CAF values: low, medium, high, mission-critical"
+  type        = string
+  default     = "low"
 }

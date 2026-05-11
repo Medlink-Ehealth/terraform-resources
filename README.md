@@ -18,6 +18,8 @@
 - [Prerequisites](#prerequisites)
 - [Authentication](#authentication)
 - [Switching Subscriptions](#switching-subscriptions)
+- [Naming Convention](#naming-convention)
+- [Tagging Strategy](#tagging-strategy)
 - [Getting Started](#getting-started)
 - [What Gets Deployed](#what-gets-deployed)
 - [Network Architecture](#network-architecture)
@@ -29,6 +31,8 @@
 ## Overview
 
 This repository manages all Azure infrastructure for MedLink using a modular Terraform approach. A single set of root configuration files calls reusable modules, and environment-specific values are passed via `.tfvars` files at runtime — keeping the codebase DRY across dev, staging, and production.
+
+All resources follow [Microsoft CAF](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming) naming conventions, abbreviations, and tagging strategy.
 
 | Ticket  | Module              | Description                                   |
 | ------- | ------------------- | --------------------------------------------- |
@@ -89,7 +93,42 @@ terraform-resources/
 │   │   ├── outputs.tf
 │   │   └── variables.tf
 │   │
-│   └── storage/            # MED-118: Blob Storage, Lifecycle, Soft Delete
+│   ├── storage/            # MED-118: Blob Storage, Lifecycle, Soft Delete
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   │
+│   ├── postgres/           # MED-19: PostgreSQL Flexible Server (Michael)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   │
+│   ├── redis/              # MED-19: Azure Cache for Redis (Michael)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   │
+│   ├── servicebus/         # MED-19: Azure Service Bus (Michael)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   │
+│   ├── keyvault/           # MED-19: Shared Key Vault (Michael)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   │
+│   ├── acr/                # MED-19: Azure Container Registry (Michael)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   │
+│   ├── monitoring/         # MED-D-52: Log Analytics + Alert Rules (Pelumi)
+│   │   ├── main.tf
+│   │   ├── outputs.tf
+│   │   └── variables.tf
+│   │
+│   └── staticwebapp/       # MED-289: Azure Static Web Apps (Pelumi + Michael)
 │       ├── main.tf
 │       ├── outputs.tf
 │       └── variables.tf
@@ -180,7 +219,76 @@ terraform plan -var-file=environments/dev.tfvars -out=plan.tfplan
 
 ---
 
-## Getting Started
+## Naming Convention
+
+All resources follow the [Microsoft Cloud Adoption Framework (CAF)](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming) naming pattern:
+
+```
+{resource-type-abbreviation}-{workload}-{environment}-{region}-{instance}
+```
+
+### Region Abbreviations Used
+
+| Azure Region   | Abbreviation |
+| -------------- | ------------ |
+| Australia East | `aue`        |
+| East US 2      | `eus2`       |
+| West Europe    | `weu`        |
+
+### Resource Name Examples
+
+| Resource              | Pattern                          | Example                |
+| --------------------- | -------------------------------- | ---------------------- |
+| Resource Group        | `rg-{workload}-{env}`            | `rg-medlink-dev`       |
+| Virtual Network       | `vnet-{workload}-{region}-{###}` | `vnet-medlink-aue-001` |
+| Subnet                | `snet-{purpose}-{region}-{###}`  | `snet-aks-aue-001`     |
+| NSG                   | `nsg-{purpose}-{###}`            | `nsg-aks-001`          |
+| AKS Cluster           | `aks-{workload}-{env}`           | `aks-medlink-dev`      |
+| Key Vault             | `kv-{workload}-{env}`            | `kv-medlink-dev`       |
+| Front Door Profile    | `afd-{workload}-{env}`           | `afd-medlink-dev`      |
+| Front Door Endpoint   | `fde-{workload}-{env}`           | `fde-medlink-dev`      |
+| WAF Policy            | `fdfp-{workload}-{env}`          | `fdfp-medlink-dev`     |
+| Storage Account       | `st{workload}{###}`              | `stmedlink001`         |
+| Log Analytics         | `log-{workload}-{env}`           | `log-medlink-dev`      |
+| Container Registry    | `cr{workload}{env}{###}`         | `crmedlinkdev001`      |
+| Service Bus Namespace | `sbns-{workload}-{env}`          | `sbns-medlink-dev`     |
+| PostgreSQL Server     | `psql-{workload}-{env}`          | `psql-medlink-dev`     |
+| Redis Cache           | `redis-{workload}-{env}`         | `redis-medlink-dev`    |
+| Static Web App        | `stapp-{workload}-{env}`         | `stapp-medlink-dev`    |
+
+> Full abbreviation reference: [CAF Abbreviation Recommendations](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations)
+
+---
+
+## Tagging Strategy
+
+All resources are tagged following the [CAF tagging strategy](https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-tagging) across five categories:
+
+### Mandatory Tags
+
+| Category       | Tag Key        | Example Value                               | Purpose                                |
+| -------------- | -------------- | ------------------------------------------- | -------------------------------------- |
+| Functional     | `env`          | `dev`, `staging`, `prod`                    | Environment identification             |
+| Functional     | `app`          | `medlink`                                   | Application/workload name              |
+| Functional     | `region`       | `australiaeast`                             | Region visibility for multi-region ops |
+| Functional     | `managed_by`   | `terraform`                                 | Identifies IaC-managed resources       |
+| Accounting     | `costcenter`   | `medlink-engineering`                       | Cost allocation and billing            |
+| Ownership      | `opsteam`      | `pelumi@medlink.com`                        | Operations team accountability         |
+| Ownership      | `businessunit` | `engineering`                               | Business unit alignment                |
+| Classification | `criticality`  | `low`, `medium`, `high`, `mission-critical` | Governance and security classification |
+
+### Tag Values Per Environment
+
+| Tag           | Dev         | Staging     | Prod               |
+| ------------- | ----------- | ----------- | ------------------ |
+| `env`         | `dev`       | `staging`   | `prod`             |
+| `criticality` | `low`       | `medium`    | `mission-critical` |
+| `app`         | `medlink`   | `medlink`   | `medlink`          |
+| `managed_by`  | `terraform` | `terraform` | `terraform`        |
+
+> Tags use **lowercase keys** and **consistent value casing** as required by CAF.
+
+---
 
 ### Step 1 — Clone the repository
 
@@ -381,13 +489,19 @@ The `prod.tfvars` file uses larger VM sizes, higher node counts, and WAF in `Pre
 
 ## Module Progress
 
-| Ticket   | Module               | Owner   | Status      |
-| -------- | -------------------- | ------- | ----------- |
-| MED-17   | `modules/network`    | Pelumi  | ✅ Complete |
-| MED-107  | `modules/aks`        | Pelumi  | ✅ Complete |
-| MED-105  | `modules/frontdoor`  | Pelumi  | ✅ Complete |
-| MED-118  | `modules/storage`    | Pelumi  | ✅ Complete |
-| MED-19   | `modules/postgres`   | Michael | 🔜 Upcoming |
-| MED-19   | `modules/redis`      | Michael | 🔜 Upcoming |
-| MED-19   | `modules/keyvault`   | Michael | 🔜 Upcoming |
-| MED-D-52 | `modules/monitoring` | Pelumi  | 🔜 Sprint 5 |
+| Ticket   | Module                         | Owner            | Status                   |
+| -------- | ------------------------------ | ---------------- | ------------------------ |
+| MED-17   | `modules/network`              | Pelumi           | ✅ Complete              |
+| MED-107  | `modules/aks`                  | Pelumi           | ✅ Complete              |
+| MED-105  | `modules/frontdoor`            | Pelumi           | ✅ Complete              |
+| MED-118  | `modules/storage`              | Pelumi           | ✅ Complete              |
+| MED-99   | All 10 module stubs            | Pelumi           | ✅ Complete              |
+| MED-19   | `modules/postgres`             | Michael          | 🔧 Stub ready            |
+| MED-19   | `modules/redis`                | Michael          | 🔧 Stub ready            |
+| MED-19   | `modules/servicebus`           | Michael          | 🔧 Stub ready            |
+| MED-19   | `modules/keyvault`             | Michael          | 🔧 Stub ready            |
+| MED-19   | `modules/acr`                  | Michael          | 🔧 Stub ready            |
+| MED-D-52 | `modules/monitoring`           | Pelumi           | 🔧 Stub ready — Sprint 5 |
+| MED-289  | `modules/staticwebapp`         | Pelumi + Michael | 🔧 Stub ready            |
+| MED-100  | GitHub OIDC federated identity | Pelumi           | 🔜 Next                  |
+| MED-101  | Infracost in pipeline          | Pelumi           | 🔜 Upcoming              |
