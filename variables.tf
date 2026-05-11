@@ -106,3 +106,17 @@ variable "key_vault_name" {
   type        = string
   default     = "medlink-kv"
 }
+
+
+# ── Front Door ────────────────────────────────────────────────────────────────
+
+variable "nginx_ingress_ip" {
+  description = "External IP of the NGINX Ingress Controller — origin for Front Door."
+  type        = string
+}
+
+variable "waf_mode" {
+  description = "WAF mode — Detection for dev, Prevention for prod."
+  type        = string
+  default     = "Detection"
+}

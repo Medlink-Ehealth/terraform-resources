@@ -23,3 +23,7 @@ spot_node_vm_size   = "Standard_D4s_v4"
 spot_node_min_count = 2
 spot_node_max_count = 10
 key_vault_name      = "medlink-kv"
+
+# Front Door
+nginx_ingress_ip = "PROD_NGINX_IP_HERE"
+waf_mode         = "Prevention"

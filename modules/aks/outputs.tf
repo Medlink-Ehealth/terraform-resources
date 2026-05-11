@@ -40,7 +40,7 @@ output "key_vault_uri" {
   value       = azurerm_key_vault.main.vault_uri
 }
 
-output "kubeconfig_secret_name" {
-  description = "Name of the Key Vault secret holding the kubeconfig."
-  value       = azurerm_key_vault_secret.kubeconfig.name
-}
+# output "kubeconfig_secret_name" {
+#   description = "Name of the Key Vault secret holding the kubeconfig."
+#   value       = azurerm_key_vault_secret.kubeconfig.name
+# }

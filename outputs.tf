@@ -39,7 +39,13 @@ output "oidc_issuer_url" {
   value       = module.aks.oidc_issuer_url
 }
 
-output "key_vault_uri" {
-  description = "Key Vault URI — where kubeconfig secret is stored."
-  value       = module.aks.key_vault_uri
+# output "key_vault_uri" {
+#   description = "Key Vault URI — where kubeconfig secret is stored."
+#   value       = module.aks.key_vault_uri
+# }
+
+
+output "frontdoor_hostname" {
+  description = "Front Door public hostname — open this in a browser to test."
+  value       = module.frontdoor.frontdoor_endpoint_hostname
 }

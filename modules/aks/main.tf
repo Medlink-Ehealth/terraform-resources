@@ -196,15 +196,15 @@ resource "azurerm_kubernetes_cluster_node_pool" "spot" {
 # the client credentials needed to run kubectl commands against the cluster.
 # ─────────────────────────────────────────────────────────────────────────────
 
-resource "azurerm_key_vault_secret" "kubeconfig" {
-  name         = "aks-kubeconfig-${var.environment}"
-  value        = azurerm_kubernetes_cluster.main.kube_config_raw
-  key_vault_id = azurerm_key_vault.main.id
+# resource "azurerm_key_vault_secret" "kubeconfig" {
+#   name         = "aks-kubeconfig-${var.environment}"
+#   value        = azurerm_kubernetes_cluster.main.kube_config_raw
+#   key_vault_id = azurerm_key_vault.main.id
 
-  # Wait for the role assignment to fully propagate before writing the secret.
-  # Azure RBAC propagation can take up to 30 seconds — depends_on ensures
-  # Terraform waits rather than racing ahead and hitting a 403.
-  depends_on = [azurerm_role_assignment.kv_terraform_secrets_officer]
+#   # Wait for the role assignment to fully propagate before writing the secret.
+#   # Azure RBAC propagation can take up to 30 seconds — depends_on ensures
+#   # Terraform waits rather than racing ahead and hitting a 403.
+#   depends_on = [azurerm_role_assignment.kv_terraform_secrets_officer]
 
-  tags = local.common_tags
-}
+#   tags = local.common_tags
+# }

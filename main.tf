@@ -75,3 +75,26 @@ module "aks" {
 
   depends_on = [module.network]
 }
+
+
+# ── Front Door Module (MED-105) ───────────────────────────────────────────────
+# Creates Front Door Standard profile, WAF policy, endpoint, origin group,
+# origin pointing to NGINX Ingress IP, route, and security policy.
+# Depends on AKS being deployed first so the NGINX IP exists.
+
+module "frontdoor" {
+  source = "./modules/frontdoor"
+
+  resource_group_name = azurerm_resource_group.main.name
+  location            = var.location
+  frontdoor_name      = "medlink-frontdoor"
+  origin_ip           = var.nginx_ingress_ip
+  waf_policy_name     = "medlinkwafpolicy"
+  waf_mode            = var.waf_mode
+  environment         = var.environment
+  project             = var.project
+  owner               = var.owner
+  cost_center         = var.cost_center
+
+  depends_on = [module.aks]
+}
