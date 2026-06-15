@@ -128,6 +128,20 @@ variable "storage_account_name" {
   type        = string
 }
 
+# ── ACR ───────────────────────────────────────────────────────────────────────
+
+variable "acr_name" {
+  description = "Globally-unique ACR name (5-50 lowercase alphanumeric chars)."
+  type        = string
+  default     = "crmedlinkdev001"
+}
+
+variable "acr_sku" {
+  description = "ACR SKU. Allowed: Basic, Standard, Premium."
+  type        = string
+  default     = "Basic"
+}
+
 # ── CAF Tags ──────────────────────────────────────────────────────────────────
 
 variable "region" {

@@ -137,3 +137,27 @@ module "storage" {
 
   depends_on = [azurerm_resource_group.main]
 }
+
+# ── ACR Module (MED-19) ───────────────────────────────────────────────────────
+# Creates a new Azure Container Registry in the workload region (same RG as
+# AKS) and grants the AKS kubelet managed identity AcrPull on it so the
+# cluster can pull images without credentials.
+
+module "acr" {
+  source = "./modules/acr"
+
+  resource_group_name        = azurerm_resource_group.main.name
+  location                   = var.location
+  acr_name                   = var.acr_name
+  sku                        = var.acr_sku
+  kubelet_identity_object_id = module.aks.kubelet_identity_object_id
+  environment                = var.environment
+  project                    = var.project
+  owner                      = var.owner
+  cost_center                = var.cost_center
+  region                     = var.region
+  business_unit              = var.business_unit
+  criticality                = var.criticality
+
+  depends_on = [module.aks]
+}

@@ -59,3 +59,13 @@ output "primary_blob_endpoint" {
   description = "Primary blob endpoint URL."
   value       = module.storage.primary_blob_endpoint
 }
+
+output "acr_login_server" {
+  description = "Login server URL of the ACR created by this stack."
+  value       = module.acr.acr_login_server
+}
+
+output "acr_id" {
+  description = "Resource ID of the ACR created by this stack."
+  value       = module.acr.acr_id
+}
