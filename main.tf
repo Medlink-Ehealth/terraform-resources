@@ -161,3 +161,119 @@ module "acr" {
 
   depends_on = [module.aks]
 }
+
+# ── Current Azure context (MED-19) ────────────────────────────────────────────
+# Used to grant the DevOps service principal (the identity Terraform runs as)
+# write access to the shared Key Vault, and to supply the tenant ID.
+data "azurerm_client_config" "current" {}
+
+# ── Workload Identity (MED-19) ────────────────────────────────────────────────
+# User-assigned managed identity used by application pods via AKS Workload
+# Identity. It is granted read-only access to the shared Key Vault so apps can
+# fetch connection strings at runtime without any stored credentials.
+resource "azurerm_user_assigned_identity" "workload" {
+  name                = "id-medlink-workload-${var.environment}"
+  resource_group_name = azurerm_resource_group.main.name
+  location            = var.location
+
+  tags = {
+    env          = var.environment
+    app          = var.project
+    region       = var.region
+    managed_by   = "terraform"
+    costcenter   = var.cost_center
+    opsteam      = var.owner
+    businessunit = var.business_unit
+    criticality  = var.criticality
+  }
+}
+
+# ── Key Vault Module (MED-19c) ────────────────────────────────────────────────
+# Shared secrets store. RBAC grants the DevOps SP write access and the workload
+# identity read access. PostgreSQL, Redis and Service Bus write their connection
+# strings here, so this is created before those modules.
+module "keyvault" {
+  source = "./modules/keyvault"
+
+  resource_group_name            = azurerm_resource_group.main.name
+  location                       = var.location
+  key_vault_name                 = "kv-medlink-shared-${var.environment}"
+  tenant_id                      = data.azurerm_client_config.current.tenant_id
+  workload_identity_principal_id = azurerm_user_assigned_identity.workload.principal_id
+  devops_principal_id            = data.azurerm_client_config.current.object_id
+  environment                    = var.environment
+  project                        = var.project
+  owner                          = var.owner
+  cost_center                    = var.cost_center
+  region                         = var.region
+  business_unit                  = var.business_unit
+  criticality                    = var.criticality
+
+  depends_on = [azurerm_resource_group.main]
+}
+
+# ── PostgreSQL Module (MED-19a) ───────────────────────────────────────────────
+# Flexible Server (Burstable B1ms) with VNet integration — no public access.
+# Admin password is auto-generated and the connection string is written to the
+# shared Key Vault. depends_on keyvault so the secret write succeeds.
+module "postgres" {
+  source = "./modules/postgres"
+
+  resource_group_name  = azurerm_resource_group.main.name
+  location             = var.location
+  postgres_server_name = "psql-medlink-${var.environment}"
+  subnet_postgres_id   = module.network.subnet_postgres_id
+  vnet_id              = module.network.vnet_id
+  key_vault_id         = module.keyvault.key_vault_id
+  environment          = var.environment
+  project              = var.project
+  owner                = var.owner
+  cost_center          = var.cost_center
+  region               = var.region
+  business_unit        = var.business_unit
+  criticality          = var.criticality
+
+  depends_on = [module.network, module.keyvault]
+}
+
+# ── Redis Module (MED-19a) ────────────────────────────────────────────────────
+# Azure Cache for Redis (Basic C0) with the non-SSL port disabled, so clients
+# must connect over TLS (rediss://). Connection string stored in Key Vault.
+module "redis" {
+  source = "./modules/redis"
+
+  resource_group_name = azurerm_resource_group.main.name
+  location            = var.location
+  redis_name          = "redis-medlink-${var.environment}"
+  key_vault_id        = module.keyvault.key_vault_id
+  environment         = var.environment
+  project             = var.project
+  owner               = var.owner
+  cost_center         = var.cost_center
+  region              = var.region
+  business_unit       = var.business_unit
+  criticality         = var.criticality
+
+  depends_on = [module.keyvault]
+}
+
+# ── Service Bus Module (MED-19b) ──────────────────────────────────────────────
+# Standard namespace with topics appointments, prescriptions, notifications and
+# one subscription each. Connection string stored in Key Vault.
+module "servicebus" {
+  source = "./modules/servicebus"
+
+  resource_group_name       = azurerm_resource_group.main.name
+  location                  = var.location
+  servicebus_namespace_name = "sb-medlink-${var.environment}"
+  key_vault_id              = module.keyvault.key_vault_id
+  environment               = var.environment
+  project                   = var.project
+  owner                     = var.owner
+  cost_center               = var.cost_center
+  region                    = var.region
+  business_unit             = var.business_unit
+  criticality               = var.criticality
+
+  depends_on = [module.keyvault]
+}

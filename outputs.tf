@@ -69,3 +69,40 @@ output "acr_id" {
   description = "Resource ID of the ACR created by this stack."
   value       = module.acr.acr_id
 }
+
+# ── MED-19: Platform data services ────────────────────────────────────────────
+
+output "shared_key_vault_uri" {
+  description = "URI of the shared Key Vault holding all connection strings."
+  value       = module.keyvault.key_vault_uri
+}
+
+output "shared_key_vault_name" {
+  description = "Name of the shared Key Vault."
+  value       = module.keyvault.key_vault_name
+}
+
+output "workload_identity_client_id" {
+  description = "Client ID of the app Workload Identity — used to configure federated credentials."
+  value       = azurerm_user_assigned_identity.workload.client_id
+}
+
+output "postgres_fqdn" {
+  description = "Private FQDN of the PostgreSQL Flexible Server."
+  value       = module.postgres.postgres_fqdn
+}
+
+output "redis_hostname" {
+  description = "Hostname of the Redis cache."
+  value       = module.redis.redis_hostname
+}
+
+output "servicebus_endpoint" {
+  description = "Service Bus namespace endpoint."
+  value       = module.servicebus.servicebus_endpoint
+}
+
+output "servicebus_topic_names" {
+  description = "Service Bus topics created."
+  value       = module.servicebus.servicebus_topic_names
+}

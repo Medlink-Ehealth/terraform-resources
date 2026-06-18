@@ -33,9 +33,10 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Administrator password. Passed via pipeline secret — never hardcoded."
+  description = "Administrator password. Passed via pipeline secret. If null, a random password is generated and stored only in Key Vault."
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "sku_name" {
@@ -51,8 +52,19 @@ variable "storage_mb" {
 }
 
 variable "subnet_postgres_id" {
-  description = "Subnet ID for PostgreSQL private endpoint — from network module output."
+  description = "Subnet ID for PostgreSQL VNet integration — from network module output. Must be delegated to Microsoft.DBforPostgreSQL/flexibleServers."
   type        = string
+}
+
+variable "vnet_id" {
+  description = "VNet ID to link the private DNS zone to — from network module output."
+  type        = string
+}
+
+variable "database_name" {
+  description = "Name of the application database to create on the server."
+  type        = string
+  default     = "medlink"
 }
 
 variable "key_vault_id" {
@@ -80,4 +92,22 @@ variable "cost_center" {
   description = "Cost center for billing tags."
   type        = string
   default     = "medlink-engineering"
+}
+
+variable "region" {
+  description = "Azure region label for tagging."
+  type        = string
+  default     = ""
+}
+
+variable "business_unit" {
+  description = "Business unit responsible for the resources."
+  type        = string
+  default     = "engineering"
+}
+
+variable "criticality" {
+  description = "Resource criticality per CAF. Values: low, medium, high, mission-critical."
+  type        = string
+  default     = "low"
 }

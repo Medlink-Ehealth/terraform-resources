@@ -59,11 +59,13 @@ resource "azurerm_subnet" "aks_nodes" {
   service_endpoints = ["Microsoft.ContainerRegistry"]
 }
 
-# Subnet 2 — PostgreSQL Private Endpoint (10.0.2.0/24)
-# Private endpoints allow the database to be accessed inside the VNet only.
-# No public internet can reach it at all.
-# private_endpoint_network_policies_enabled = false is REQUIRED for private
-# endpoints to work on this subnet — Azure enforces this.
+# Subnet 2 — PostgreSQL (10.0.2.0/24)
+# Used for PostgreSQL Flexible Server VNet integration. The database is reachable
+# inside the VNet only — no public internet can reach it at all.
+#
+# PostgreSQL Flexible Server uses delegated subnet injection (not private
+# endpoints), so the subnet is delegated to the flexibleServers service (MED-19).
+# A delegated subnet can only host flexible servers — no other resources.
 resource "azurerm_subnet" "postgres_pe" {
   name                 = var.subnet_postgres_name
   resource_group_name  = var.resource_group_name
@@ -71,6 +73,16 @@ resource "azurerm_subnet" "postgres_pe" {
   address_prefixes     = [var.subnet_postgres_cidr]
 
   private_endpoint_network_policies = "Disabled"
+
+  delegation {
+    name = "fs-delegation"
+    service_delegation {
+      name = "Microsoft.DBforPostgreSQL/flexibleServers"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action",
+      ]
+    }
+  }
 }
 
 # Subnet 3 — Gateway (10.0.3.0/24)

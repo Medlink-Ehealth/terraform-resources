@@ -64,3 +64,21 @@ variable "cost_center" {
   type        = string
   default     = "medlink-engineering"
 }
+
+variable "region" {
+  description = "Azure region label for tagging."
+  type        = string
+  default     = ""
+}
+
+variable "business_unit" {
+  description = "Business unit responsible for the resources."
+  type        = string
+  default     = "engineering"
+}
+
+variable "criticality" {
+  description = "Resource criticality per CAF. Values: low, medium, high, mission-critical."
+  type        = string
+  default     = "low"
+}
