@@ -106,3 +106,8 @@ output "servicebus_topic_names" {
   description = "Service Bus topics created."
   value       = module.servicebus.servicebus_topic_names
 }
+
+output "github_oidc_subjects" {
+  description = "GitHub OIDC federated credential subjects trusted by the deploy app registration."
+  value       = module.github_oidc.federated_credential_subjects
+}

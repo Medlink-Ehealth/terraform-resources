@@ -161,3 +161,35 @@ variable "criticality" {
   type        = string
   default     = "low"
 }
+
+# ── GitHub OIDC (MED-100) ─────────────────────────────────────────────────────
+
+variable "github_org" {
+  description = "GitHub organisation that owns the repositories."
+  type        = string
+  default     = "Medlink-Ehealth"
+}
+
+variable "github_oidc_app_object_id" {
+  description = "Object ID of the existing Entra app registration GitHub Actions authenticates as (medlink-gh-oidc-sp)."
+  type        = string
+  default     = "24b422a7-7654-4efc-922b-ef8beeb403b9"
+}
+
+variable "github_oidc_repositories" {
+  description = "Repositories (without org prefix) to trust via GitHub OIDC."
+  type        = list(string)
+  default = [
+    "medlink-backend",
+    "medlink-frontend",
+    "terraform-resources",
+    "pipeline-templates",
+    "Medlink-landingpage",
+  ]
+}
+
+variable "github_oidc_environments" {
+  description = "GitHub Environment names to trust for each repo (subject environment:<name>)."
+  type        = list(string)
+  default     = ["dev"]
+}

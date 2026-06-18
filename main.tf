@@ -237,8 +237,9 @@ module "postgres" {
 }
 
 # ── Redis Module (MED-19a) ────────────────────────────────────────────────────
-# Azure Cache for Redis (Basic C0) with the non-SSL port disabled, so clients
-# must connect over TLS (rediss://). Connection string stored in Key Vault.
+# Azure Managed Redis (Balanced_B0) with TLS-only access (client_protocol
+# Encrypted), so clients must connect over TLS (rediss://). Connection string
+# stored in Key Vault.
 module "redis" {
   source = "./modules/redis"
 
@@ -276,4 +277,26 @@ module "servicebus" {
   criticality               = var.criticality
 
   depends_on = [module.keyvault]
+}
+
+# ── GitHub OIDC Module (MED-100) ──────────────────────────────────────────────
+# Adds GitHub Actions OIDC federated identity credentials to the existing
+# medlink-gh-oidc-sp app registration so CI/CD pipelines authenticate to Azure
+# without long-lived secrets. The two pre-existing main-branch credentials
+# (frontend, backend) are adopted via credential_name_overrides + terraform
+# import so they are not recreated.
+module "github_oidc" {
+  source = "./modules/github-oidc"
+
+  app_object_id       = var.github_oidc_app_object_id
+  github_org          = var.github_org
+  repositories        = var.github_oidc_repositories
+  branches            = ["main"]
+  enable_pull_request = true
+  github_environments = var.github_oidc_environments
+
+  credential_name_overrides = {
+    "repo:${var.github_org}/medlink-frontend:ref:refs/heads/main" = "main-frontend"
+    "repo:${var.github_org}/medlink-backend:ref:refs/heads/main"  = "main-backend"
+  }
 }

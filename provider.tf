@@ -21,6 +21,10 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "~> 3.0"
+    }
     random = {
       source  = "hashicorp/random"
       version = "~> 3.6"
@@ -32,3 +36,7 @@ provider "azurerm" {
   features {}
   storage_use_azuread = true
 }
+
+# Authenticates to Microsoft Graph using the same Azure CLI / ARM_* credentials
+# as the azurerm provider. Used to manage GitHub OIDC federated credentials.
+provider "azuread" {}
