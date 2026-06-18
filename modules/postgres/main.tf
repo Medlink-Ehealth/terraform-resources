@@ -80,6 +80,10 @@ resource "azurerm_postgresql_flexible_server" "main" {
   sku_name   = var.sku_name
   storage_mb = var.storage_mb
 
+  # VNet-integrated server — public access must be disabled, otherwise Azure
+  # rejects the create with ConflictingPublicNetworkAccessAndVirtualNetworkConfiguration.
+  public_network_access_enabled = false
+
   delegated_subnet_id = var.subnet_postgres_id
   private_dns_zone_id = azurerm_private_dns_zone.postgres.id
 
