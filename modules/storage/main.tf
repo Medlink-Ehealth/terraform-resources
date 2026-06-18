@@ -95,7 +95,7 @@ resource "azurerm_storage_account" "main" {
 # Soft-delete is inherited from the storage account blob_properties above.
 resource "azurerm_storage_container" "documents" {
   name                  = "medlink-documents"
-  storage_account_name  = azurerm_storage_account.main.name
+  storage_account_id    = azurerm_storage_account.main.id
   container_access_type = "private"
 }
 
@@ -104,7 +104,7 @@ resource "azurerm_storage_container" "documents" {
 # Soft-delete is inherited from the storage account blob_properties above.
 resource "azurerm_storage_container" "pdfs" {
   name                  = "medlink-pdfs"
-  storage_account_name  = azurerm_storage_account.main.name
+  storage_account_id    = azurerm_storage_account.main.id
   container_access_type = "private"
 }
 
@@ -114,7 +114,7 @@ resource "azurerm_storage_container" "pdfs" {
 # a previous version. Versioning is enabled at the account level above.
 resource "azurerm_storage_container" "tfstate" {
   name                  = "medlink-tfstate"
-  storage_account_name  = azurerm_storage_account.main.name
+  storage_account_id    = azurerm_storage_account.main.id
   container_access_type = "private"
 }
 
