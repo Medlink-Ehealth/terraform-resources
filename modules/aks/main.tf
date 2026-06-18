@@ -58,7 +58,7 @@ resource "azurerm_key_vault" "main" {
 
   # Use Azure RBAC for access control instead of legacy vault access policies.
   # This is the recommended modern approach for Key Vault permissions.
-  enable_rbac_authorization = true
+  rbac_authorization_enabled = true
 
   # Soft delete keeps deleted secrets recoverable for 7 days.
   # This protects against accidental deletion of the kubeconfig.
@@ -170,12 +170,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "spot" {
   spot_max_price  = -1       # -1 means pay up to the on-demand price (safest option)
 
   # ── Cluster Autoscaler ────────────────────────────────────────────────────────
-  # enable_auto_scaling must be true to use min/max counts.
+  # auto_scaling_enabled must be true to use min/max counts.
   # The autoscaler adds nodes when pods are pending due to insufficient resources
   # and removes nodes when they've been underutilised for 10+ minutes.
-  enable_auto_scaling = true
-  min_count           = var.spot_node_min_count # 1 — always keep at least 1 node
-  max_count           = var.spot_node_max_count # 3 — never exceed 3 nodes in dev
+  auto_scaling_enabled = true
+  min_count            = var.spot_node_min_count # 1 — always keep at least 1 node
+  max_count            = var.spot_node_max_count # 3 — never exceed 3 nodes in dev
 
   # Spot nodes automatically get a taint that prevents regular pods from
   # scheduling here unless the pod explicitly tolerates it.

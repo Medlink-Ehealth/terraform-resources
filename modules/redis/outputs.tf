@@ -3,18 +3,18 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 output "redis_id" {
-  description = "Resource ID of the Redis cache."
-  value       = azurerm_redis_cache.main.id
+  description = "Resource ID of the Managed Redis instance."
+  value       = azurerm_managed_redis.main.id
 }
 
 output "redis_hostname" {
-  description = "Hostname of the Redis cache."
-  value       = azurerm_redis_cache.main.hostname
+  description = "Hostname of the Managed Redis instance."
+  value       = azurerm_managed_redis.main.hostname
 }
 
 output "redis_ssl_port" {
-  description = "SSL port for TLS connections (rediss://)."
-  value       = azurerm_redis_cache.main.ssl_port
+  description = "TLS port for rediss:// connections."
+  value       = azurerm_managed_redis.main.default_database[0].port
 }
 
 output "redis_connection_string_secret_name" {

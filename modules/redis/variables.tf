@@ -15,27 +15,21 @@ variable "location" {
 }
 
 variable "redis_name" {
-  description = "Name of the Redis cache instance."
+  description = "Name of the Managed Redis instance."
   type        = string
   default     = "medlink-redis"
 }
 
 variable "sku_name" {
-  description = "Redis SKU. Basic C0 is sufficient for dev."
+  description = "Azure Managed Redis SKU. Balanced_B0 is the smallest (dev)."
   type        = string
-  default     = "Basic"
+  default     = "Balanced_B0"
 }
 
-variable "family" {
-  description = "Redis family. C = Basic/Standard, P = Premium."
-  type        = string
-  default     = "C"
-}
-
-variable "capacity" {
-  description = "Redis cache size. 0 = 250MB (smallest)."
-  type        = number
-  default     = 0
+variable "high_availability_enabled" {
+  description = "Enable zone-redundant high availability. Disabled for dev to save cost; enable in prod."
+  type        = bool
+  default     = false
 }
 
 variable "key_vault_id" {

@@ -56,7 +56,7 @@ resource "azurerm_storage_account" "main" {
   # Security hardening
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
-  enable_https_traffic_only       = true
+  https_traffic_only_enabled      = true
   shared_access_key_enabled       = false
   default_to_oauth_authentication = true
 
